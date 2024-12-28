@@ -72,7 +72,7 @@ You can install PlatformIO as a VS Code extension or as a standalone tool.
   - Blynk: For integrating the Blynk app.
   - DHT sensor library: For interfacing with the DHT22 sensor.
   - CO2 sensor library (if necessary, depending on your CO2 sensor model).
-- Alternatively, you can add them directly in your platformio.ini file:
+- Alternatively, you can add them directly in your `platformio.ini` file:
 
 ```ini
   lib_deps =
