@@ -13,6 +13,7 @@
 ---
 
 ## 🛠️ Components Required
+s
 
 - **Arduino Uno** (or compatible board)
 - **CO2 Sensor** (e.g., **MG-811**, **MH-Z19**, **CCS811**, etc.)
