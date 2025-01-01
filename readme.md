@@ -54,7 +54,7 @@ The wiring setup involves connecting the following components to your Arduino:
 Clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/your-username/mega-clever-co2-dht22.git
+git clone https://github.com/Nickky464/megaClever.git
 ```
 
 ### 2. Install PlatformIO
