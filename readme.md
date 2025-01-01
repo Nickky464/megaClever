@@ -51,7 +51,7 @@ The wiring setup involves connecting the following components to your Arduino:
 
 ### 1. Clone the repository
 
-Clone this repository:
+Clone this repository to your local machine:
 
 ```bash
 git clone https://github.com/Nickky464/megaClever.git
