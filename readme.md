@@ -54,7 +54,7 @@ The wiring setup involves connecting the following components to your Arduino:
 Clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/your-username/mega-clever-co2-dht22.git
+git clone https://github.com/Nickky464/megaClever.git
 ```
 
 ### 2. Install PlatformIO
@@ -72,7 +72,7 @@ You can install PlatformIO as a VS Code extension or as a standalone tool.
   - Blynk: For integrating the Blynk app.
   - DHT sensor library: For interfacing with the DHT22 sensor.
   - CO2 sensor library (if necessary, depending on your CO2 sensor model).
-- Alternatively, you can add them directly in your platformio.ini file:
+- Alternatively, you can add them directly in your `platformio.ini` file:
 
 ```ini
   lib_deps =
