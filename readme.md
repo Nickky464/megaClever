@@ -120,4 +120,4 @@ After uploading the code, open the Serial Monitor in PlatformIO:
 Open the **Blynk** app on your phone, and you should be able to see the real-time data for **CO2 levels**, **temperature**, and **humidity**.
 
 ---
-This `readme.md` file is not complete.
+This `readme.md` file isn't complete.
