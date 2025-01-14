@@ -47,8 +47,8 @@ void setup()
   // Start Serial communication with the computer (for debugging)
   Serial.begin(9600);
 
-  // Start Serial1 communication with the ESP8266
-  Serial1.begin(9600); // Set the baud rate to communicate with ESP8266
+  // Start Serial3 communication with the ESP8266
+  Serial3.begin(9600); // Set the baud rate to communicate with ESP8266
   dht.begin();
   Serial.println("Starting communication with ESP8266...");
 }
@@ -135,12 +135,12 @@ int MGGetPercentage(float volts, float *pcurve)
 }
 
 // Send Temperature, Humidity, and CO2 data to the ESP8266
-void sendToESP8266(float temp, float hum, float co2)
+void sendToESP8266(float temp_c, float humidity, int percentage)
 {
   // Create a formatted message to send
-  String message = "Temperature: " + String(temp) + " °C, Humidity: " + String(hum) + " %, CO2: " + String(co2) + " %";
+  String message = "Temperature: " + String(temp_c) + " °C, Humidity: " + String(humidity) + " %, CO2: " + String(percentage) + " %";
 
-  // Send the message over Serial1 (to ESP8266)
+  // Send the message over Serial3 (to ESP8266)
   Serial.println(message);
-  Serial1.println(message);
+  Serial3.println(message);
 }
