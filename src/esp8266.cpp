@@ -2,16 +2,16 @@
 #include <ESP8266WiFi.h>
 
 #define BLYNK_PRINT Serial
-#define BLYNK_TEMPLATE_ID ""                   // Blynk template id
-#define BLYNK_TEMPLATE_NAME ""                          // Blynk template name
-#define BLYNK_AUTH_TOKEN "" // Blynk auth token
+#define BLYNK_TEMPLATE_ID "TMPL6gdQcodak"                   // Blynk template id
+#define BLYNK_TEMPLATE_NAME "ppl2"                          // Blynk template name
+#define BLYNK_AUTH_TOKEN "AwRQJZLjIt88wFDR2WtWIV2jFMRSqYv2" // Blynk auth token
 
 #include <BlynkSimpleEsp8266.h> // Board-specific header for ESP8266 Blynk
 
 // WiFi Credentials
 // Set password to "" for open networks.
-char ssid[] = ""; // WiFi SSID "e.g. WIFINAME"
-char pass[] = "";    // WiFi PASSWORD "e.g. 12345678"
+char ssid[] = "vivoY33s"; // WiFi SSID "e.g. WIFINAME"
+char pass[] = "8b6j2ejmhs5trj2";    // WiFi PASSWORD "e.g. 12345678"
 
 float get_temperature = 0.0f;
 float get_humidity = 0.0f;
@@ -26,7 +26,7 @@ void resetMCU();
 void setup()
 {
   Serial.begin(9600);  // Initialize Serial Monitor for debugging
-  Serial1.begin(9600); // Initialize Serial1 to receive data from ATmega2560
+  // Serial.begin(9600); // Initialize Serial to receive data from ATmega2560
 
   WiFi.begin(ssid, pass);
   Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
@@ -43,9 +43,9 @@ void setup()
 void loop()
 {
   Blynk.run();
-  if (Serial1.available())
+  if (Serial.available())
   {
-    String receivedData = Serial1.readString(); // Read the incoming string
+    String receivedData = Serial.readString(); // Read the incoming string
     // String receivedData = "Temperature: 23.00 °C, Humidity: 40.00 %, CO2: 59.73 %"; // Read the incoming string
 
     // Print the received data
