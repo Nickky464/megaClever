@@ -10,8 +10,8 @@
 
 // WiFi Credentials
 // Set password to "" for open networks.
-char ssid[] = "vivoY33s"; // WiFi SSID "e.g. WIFINAME"
-char pass[] = "8b6j2ejmhs5trj2";    // WiFi PASSWORD "e.g. 12345678"
+char ssid[] = "vivoY33s";        // WiFi SSID "e.g. WIFINAME"
+char pass[] = "8b6j2ejmhs5trj2"; // WiFi PASSWORD "e.g. 12345678"
 
 float get_temperature = 0.0f;
 float get_humidity = 0.0f;
@@ -26,7 +26,7 @@ void resetMCU();
 void setup()
 {
   Serial.begin(9600);  // Initialize Serial Monitor for debugging
-  // Serial.begin(9600); // Initialize Serial to receive data from ATmega2560
+  Serial1.begin(9600); // Initialize Serial to receive data from ATmega2560
 
   WiFi.begin(ssid, pass);
   Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
@@ -43,9 +43,9 @@ void setup()
 void loop()
 {
   Blynk.run();
-  if (Serial.available())
+  if (Serial1.available())
   {
-    String receivedData = Serial.readString(); // Read the incoming string
+    String receivedData = Serial1.readString(); // Read the incoming string
     // String receivedData = "Temperature: 23.00 °C, Humidity: 40.00 %, CO2: 59.73 %"; // Read the incoming string
 
     // Print the received data
