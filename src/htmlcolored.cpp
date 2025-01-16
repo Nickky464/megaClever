@@ -137,12 +137,20 @@ void checkTimeForRelay() {
 }
 
 void handleRoot() {
-  String html = "<html><body>";
-  html += "<h1>Sensor Data</h1>";
-  html += "<p>Temperature: " + String(get_temperature) + " &deg;C</p>";
-  html += "<p>Humidity: " + String(get_humidity) + " %</p>";
-  html += "<p>CO2: " + String(get_co2) + " PPM</p>";
-  html += "</body></html>";
+  String html = "<html><head>";
+  html += "<style>";
+  html += "body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f9; color: #333; text-align: center; }";
+  html += "h1 { background: #4CAF50; color: white; padding: 10px 0; margin: 0; }";
+  html += "div.container { max-width: 800px; margin: 30px auto; padding: 20px; background: white; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); border-radius: 8px; }";
+  html += "p { font-size: 18px; line-height: 1.6; }";
+  html += "</style>";
+  html += "</head><body>";
+  html += "<h1>Environmental Sensor Data</h1>";
+  html += "<div class='container'>";
+  html += "<p><strong>Temperature:</strong> " + String(get_temperature) + " &deg;C</p>";
+  html += "<p><strong>Humidity:</strong> " + String(get_humidity) + " %</p>";
+  html += "<p><strong>CO2:</strong> " + String(get_co2) + " PPM</p>";
+  html += "</div></body></html>";
   server.send(200, "text/html", html);
 }
 
