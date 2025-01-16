@@ -33,6 +33,9 @@ float get_co2 = 0.0f;
 float slope = 2000.0;
 float offset = 0.0;
 
+void readSensors();
+void sendToBlynk();
+
 void setup() {
   // Initialize Serial Monitor
   Serial.begin(9600);

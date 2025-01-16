@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <BlynkSimpleEsp8266.h>
 #include <DHT.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
@@ -11,6 +10,8 @@
 #define BLYNK_TEMPLATE_ID "TMPL6gdQcodak"
 #define BLYNK_TEMPLATE_NAME "ppl2"
 #define BLYNK_AUTH_TOKEN "AwRQJZLjIt88wFDR2WtWIV2jFMRSqYv2"
+
+#include <BlynkSimpleEsp8266.h>
 
 // WiFi Credentials
 char ssid[] = "vivoY33s";
@@ -42,6 +43,12 @@ float get_humidity = 0.0f;
 float get_co2 = 0.0f;
 float slope = 2000.0;
 float offset = 0.0;
+
+void readSensors();
+void sendToBlynk();
+void checkTimeForRelay();
+void handleRoot();
+void handleNotFound();
 
 void setup() {
   // Initialize Serial Monitor
