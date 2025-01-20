@@ -36,6 +36,7 @@ float temp_c;
 float humidity;
 int RELAY_PIN = 4; // Relay pin
 boolean tempState = false;
+boolean pump_status = false;
 
 float get_temperature = 0.0f;
 float get_humidity = 0.0f;
@@ -80,10 +81,10 @@ int MGGetPercentage(float volts, float *pcurve)
 }
 
 // Send Temperature, Humidity, and CO2 data to the ESP8266
-void sendToESP8266(float temp_c, float humidity, int percentage)
+void sendToESP8266(float temp_c, float humidity, int percentage, boolean pump_status)
 {
   // Create a formatted message to send
-  String message = "Temperature: " + String(temp_c) + " °C, Humidity: " + String(humidity) + " %, CO2: " + String(percentage) + " %";
+  String message = "Temperature: " + String(temp_c) + " °C, Humidity: " + String(humidity) + " %, CO2: " + String(percentage) + " %" + "Pump";
 
   // Send the message over ESP8266_Serial (to ESP8266)
   Serial.println(message);
@@ -137,11 +138,15 @@ void loop()
     Serial.print(humidity);
     Serial.println(" %");
 
-    // Send CO2, Temperature, and Humidity to ESP8266
-    sendToESP8266(temp_c, humidity, percentage);
-
     // Control relay based on humidity
-    digitalWrite(RELAY_PIN, humidity <= 70 ? LOW : HIGH);
+    if (humidity <= 70)
+    {
+      digitalWrite(RELAY_PIN, HIGH);
+      pump_status = true;
+    }
+
+    // Send CO2, Temperature, and Humidity to ESP8266
+    sendToESP8266(temp_c, humidity, percentage, pump_status);
   }
   else
   {

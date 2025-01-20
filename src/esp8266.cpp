@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <SoftwareSerial.h>
+#include <ESP8266WebServer.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
 
 #define BLYNK_PRINT Serial
 #define BLYNK_TEMPLATE_ID "TMPL6gdQcodak"                   // Blynk template id
@@ -20,7 +23,17 @@ float get_co2 = 0.0f;
 int get_tempLimit = -1;
 boolean tempState = false;
 
+const int RELAY_PIN = D2;
+
+// Setup SoftwareSerial
 SoftwareSerial MEGA2560_Serial(D2, D3); // (RX, TX)
+
+// NTP Client Setup
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 7 * 3600, 60000); // UTC+7 timezone
+
+// Web Server Setup
+ESP8266WebServer server(80);
 
 float extractValue(String data, String startDelimiter, String endDelimiter);
 
@@ -128,6 +141,39 @@ void getParsedData()
   Serial.println(get_co2); // CO2 concentration as int
 }
 
+void handleRoot()
+{
+  String html = "<html><body>";
+  html += "<h1>Sensor Data</h1>";
+  html += "<p>Temperature: " + String(get_temperature) + " &deg;C</p>";
+  html += "<p>Humidity: " + String(get_humidity) + " %</p>";
+  html += "<p>CO2: " + String(get_co2) + " PPM</p>";
+  html += "</body></html>";
+  server.send(200, "text/html", html);
+}
+
+void handleNotFound()
+{
+  server.send(404, "text/plain", "404: Not Found");
+}
+
+void checkTimeForRollMotor()
+{
+  int currentHour = timeClient.getHours();
+  int currentMinute = timeClient.getMinutes();
+
+  if ((currentHour == 6) || (currentHour == 7) || (currentHour == 8 && currentMinute == 0))
+  {
+    digitalWrite(RELAY_PIN, HIGH); // Turn relay on
+    Serial.println("Relay turned ON between 6:00 and 8:00 UTC+7");
+  }
+  else
+  {
+    digitalWrite(RELAY_PIN, LOW); // Turn relay off
+    Serial.println("Relay turned OFF outside 6:00 to 8:00 UTC+7");
+  }
+}
+
 void setup()
 {
   Serial.begin(9600); // Initialize Serial Monitor for debugging
@@ -144,17 +190,31 @@ void setup()
   }
   Serial.println("Connected to WiFi!");
 
+  timeClient.begin();
+
+  server.on("/", handleRoot);
+  server.onNotFound(handleNotFound);
+  server.begin();
+  Serial.println("Web server started");
+
   Serial.println("ESP8266 is ready to receive data from ATmega2560.");
 }
 
 void loop()
 {
   Blynk.run();
+
+  timeClient.update();
+
+  server.handleClient();
+
   if (MEGA2560_Serial.available())
   {
     getParsedData();
 
     sendToBlynk();
+
+    checkTimeForRollMotor();
 
     delay(15000);
   }
