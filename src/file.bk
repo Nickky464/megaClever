@@ -26,8 +26,8 @@ void resetMCU();
 void setup()
 {
   Serial.begin(9600);  // Initialize Serial Monitor for debugging
-  // Serial1.begin(9600); // Initialize Serial to receive data from ATmega2560
-  Serial.swap();
+  Serial1.begin(9600); // Initialize Serial to receive data from ATmega2560
+  // Serial.swap();
 
   WiFi.begin(ssid, pass);
   Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
@@ -44,9 +44,9 @@ void setup()
 void loop()
 {
   Blynk.run();
-  if (!Serial.available())
+  if (Serial1.available())
   {
-    String receivedData = Serial.readString(); // Read the incoming string
+    String receivedData = Serial1.readString(); // Read the incoming string
     // String receivedData = "Temperature: 23.00 °C, Humidity: 40.00 %, CO2: 59.73 %"; // Read the incoming string
 
     // Print the received data

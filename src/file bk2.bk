@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <BlynkSimpleEsp8266.h>
 #include <DHT.h>
 
 // Blynk Credentials
@@ -8,13 +7,14 @@
 #define BLYNK_TEMPLATE_ID "TMPL6gdQcodak"
 #define BLYNK_TEMPLATE_NAME "ppl2"
 #define BLYNK_AUTH_TOKEN "AwRQJZLjIt88wFDR2WtWIV2jFMRSqYv2"
+#include <BlynkSimpleEsp8266.h>
 
 // WiFi Credentials
 char ssid[] = "P-E-A-R";  // WiFi SSID "e.g. WIFINAME"
 char pass[] = "pnpnpnpn"; // WiFi PASSWORD "e.g. 12345678"
 
 // Sensor and Pin Definitions
-#define DHT_PIN D2     // GPIO pin for DHT sensor
+#define DHT_PIN D4     // GPIO pin for DHT sensor
 #define DHT_TYPE DHT11 // DHT11 sensor type
 #define MG_PIN A0      // Analog pin for CO2 sensor
 #define RELAY_PIN D1   // GPIO pin for relay control
@@ -32,9 +32,16 @@ float get_humidity = 0.0f;
 float get_co2 = 0.0f;
 float slope = 2000.0;
 float offset = 0.0;
+float percentage;
 
-void readSensors();
+void MGReadCO2(int MG_PIN, float slope, float offset, float &ppm); // Modify function prototype
 void sendToBlynk();
+void readSensors();
+
+float MGReadCO2(int MG_PIN, float slope, float offset); // Function to read CO2 concentration in PPM
+float MGRead(int MG_PIN);                               // Function to read raw voltage
+int MGGetPercentage(float volts, float *pcurve);        // Function to calculate CO2 percentage
+void sendToESP8266(float temp, float hum, int co2);
 
 void setup()
 {
@@ -68,27 +75,28 @@ void loop()
   sendToBlynk();
 
   // Control relay based on humidity
-  if (get_humidity <= 70)
-  {
-    digitalWrite(RELAY_PIN, LOW); // Turn relay off
-  }
-  else
-  {
-    digitalWrite(RELAY_PIN, HIGH); // Turn relay on
-  }
+  // if (get_humidity <= 70)
+  // {
+  //   digitalWrite(RELAY_PIN, LOW); // Turn relay off
+  // }
+  // else
+  // {
+  //   digitalWrite(RELAY_PIN, HIGH); // Turn relay on
+  // }
 
-  delay(1000); // Delay for sensor reading
+  delay(10000); // Delay for sensor reading
 }
 
 void readSensors()
 {
+  // Read CO2 sensor
+  float co2value = MGReadCO2(MG_PIN, slope, offset);
+  float percentage = (co2value / 10000) * 100;
+  // MGReadCO2(MG_PIN, slope, offset, get_co2);
+
   // Read DHT11 sensor
   get_temperature = dht.readTemperature();
   get_humidity = dht.readHumidity();
-
-  // Read CO2 sensor
-  float voltage = analogRead(MG_PIN) * (5.0 / 1023.0); // Convert analog to voltage
-  get_co2 = (slope * voltage) + offset;                // Convert voltage to CO2 ppm
 
   // Debugging: Print values to Serial Monitor
   Serial.print("Temperature: ");
@@ -96,13 +104,29 @@ void readSensors()
   Serial.print(" °C, Humidity: ");
   Serial.print(get_humidity);
   Serial.print(" %, CO2: ");
-  Serial.print(get_co2);
-  Serial.println(" PPM");
+  Serial.print(percentage);
+  Serial.println(" %");
+}
+
+float MGReadCO2(int MG_PIN, float slope, float offset)
+{
+  int sensorValue = analogRead(MG_PIN);         // Read the raw sensor value
+  float voltage = sensorValue * (3.3 / 1023.0); // Convert to voltage (assuming 5V reference)
+
+  // Convert voltage to ppm
+  float ppm = (slope * voltage) + offset;
+
+  // Convert ppm to percentage
+  // float percentage = ppm / 10000.0;
+
+  // Return both values as a struct
+  // data = {ppm, percentage};
+  return ppm;
 }
 
 void sendToBlynk()
 {
   Blynk.virtualWrite(V0, get_temperature); // Send temperature to Blynk
   Blynk.virtualWrite(V1, get_humidity);    // Send humidity to Blynk
-  Blynk.virtualWrite(V2, get_co2);         // Send CO2 ppm to Blynk
+  Blynk.virtualWrite(V2, percentage);      // Send CO2 ppm to Blynk
 }
