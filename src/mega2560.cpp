@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <DHT.h>
+#include <SoftwareSerial.h>
 
 // Define which analog input channel you are going to use
 #define MG_PIN (A3)
@@ -24,12 +25,16 @@ float offset(0.0);
 #define DHT_TYPE (DHT11)
 
 DHT dht(DHT_PIN, DHT_TYPE); // Initialize the DHT sensor
+
+// ESP8266 Serial comunicate with SoftwareSerial
+SoftwareSerial ESP8266_Serial(6, 7);
+
 float CO2Curve[3] = {2.602, ZERO_POINT_VOLTAGE, (REACTION_VOLTAGE / (2.602 - 3))};
 
 // Declare variables
 float temp_c;
 float humidity;
-int relay1 = 4; // Relay pin
+int RELAY_PIN = 4; // Relay pin
 boolean tempState = false;
 
 float get_temperature = 0.0f;
@@ -37,19 +42,64 @@ float get_humidity = 0.0f;
 int get_tempLimit = -1;
 
 // Declare function prototypes
-float MGReadCO2(int MG_PIN, float slope, float offset); // Function to read CO2 concentration in PPM
-float MGRead(int MG_PIN);                               // Function to read raw voltage
-int MGGetPercentage(float volts, float *pcurve);        // Function to calculate CO2 percentage
-void sendToESP8266(float temp, float hum, int co2);
+// float MGReadCO2(int MG_PIN, float slope, float offset); // Function to read CO2 concentration in PPM
+// float MGRead(int MG_PIN);                               // Function to read raw voltage
+// int MGGetPercentage(float volts, float *pcurve);        // Function to calculate CO2 percentage
+
+// Define the function to read CO2 concentration
+float MGReadCO2(int MG_PIN, float slope, float offset)
+{
+  int sensorValue = analogRead(MG_PIN);         // Read the raw sensor value
+  float voltage = sensorValue * (5.0 / 1023.0); // Convert to voltage (assuming 5V reference)
+
+  // Convert voltage to ppm
+  float ppm = (slope * voltage) + offset;
+
+  // Convert ppm to percentage
+  // float percentage = ppm / 10000.0;
+
+  // Return both values as a struct
+  // data = {ppm, percentage};
+  return ppm;
+}
+
+// Read voltage from the analog sensor pin
+float MGRead(int mg_pin)
+{
+  return analogRead(mg_pin) * (3.3 / 1023.0); // For 3.3V ESP32
+}
+
+// Calculate CO2 concentration percentage based on the voltage and calibration curve
+int MGGetPercentage(float volts, float *pcurve)
+{
+  if (volts < pcurve[1])
+  {
+    return -1; // Below valid range
+  }
+  return int((volts - pcurve[1]) / (pcurve[2] - pcurve[1]) * 100);
+}
+
+// Send Temperature, Humidity, and CO2 data to the ESP8266
+void sendToESP8266(float temp_c, float humidity, int percentage)
+{
+  // Create a formatted message to send
+  String message = "Temperature: " + String(temp_c) + " °C, Humidity: " + String(humidity) + " %, CO2: " + String(percentage) + " %";
+
+  // Send the message over ESP8266_Serial (to ESP8266)
+  Serial.println(message);
+  ESP8266_Serial.println(message);
+}
 
 void setup()
 {
   // Start Serial communication with the computer (for debugging)
   Serial.begin(9600);
 
-  // Start Serial3 communication with the ESP8266
-  Serial3.begin(9600); // Set the baud rate to communicate with ESP8266
+  // Start ESP8266_Serial communication with the ESP8266
+  ESP8266_Serial.begin(9600); // Set the baud rate to communicate with ESP8266
+
   dht.begin();
+
   Serial.println("Starting communication with ESP8266...");
 }
 
@@ -91,56 +141,12 @@ void loop()
     sendToESP8266(temp_c, humidity, percentage);
 
     // Control relay based on humidity
-    digitalWrite(relay1, humidity <= 70 ? LOW : HIGH);
+    digitalWrite(RELAY_PIN, humidity <= 70 ? LOW : HIGH);
   }
   else
   {
     Serial.println("Failed to read from DHT sensor!");
   }
 
-  delay(1000);
-}
-
-// Define the function to read CO2 concentration
-float MGReadCO2(int MG_PIN, float slope, float offset)
-{
-  int sensorValue = analogRead(MG_PIN);         // Read the raw sensor value
-  float voltage = sensorValue * (5.0 / 1023.0); // Convert to voltage (assuming 5V reference)
-
-  // Convert voltage to ppm
-  float ppm = (slope * voltage) + offset;
-
-  // Convert ppm to percentage
-  // float percentage = ppm / 10000.0;
-
-  // Return both values as a struct
-  // data = {ppm, percentage};
-  return ppm;
-}
-
-// Read voltage from the analog sensor pin
-float MGRead(int mg_pin)
-{
-  return analogRead(mg_pin) * (3.3 / 1023.0); // For 3.3V ESP32
-}
-
-// Calculate CO2 concentration percentage based on the voltage and calibration curve
-int MGGetPercentage(float volts, float *pcurve)
-{
-  if (volts < pcurve[1])
-  {
-    return -1; // Below valid range
-  }
-  return int((volts - pcurve[1]) / (pcurve[2] - pcurve[1]) * 100);
-}
-
-// Send Temperature, Humidity, and CO2 data to the ESP8266
-void sendToESP8266(float temp_c, float humidity, int percentage)
-{
-  // Create a formatted message to send
-  String message = "Temperature: " + String(temp_c) + " °C, Humidity: " + String(humidity) + " %, CO2: " + String(percentage) + " %";
-
-  // Send the message over Serial3 (to ESP8266)
-  Serial.println(message);
-  Serial3.println(message);
+  delay(10000);
 }

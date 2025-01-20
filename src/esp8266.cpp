@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <SoftwareSerial.h>
 
 #define BLYNK_PRINT Serial
 #define BLYNK_TEMPLATE_ID "TMPL6gdQcodak"                   // Blynk template id
@@ -10,7 +11,7 @@
 
 // WiFi Credentials
 // Set password to "" for open networks.
-char ssid[] = "P-E-A-R";        // WiFi SSID "e.g. WIFINAME"
+char ssid[] = "P-E-A-R";  // WiFi SSID "e.g. WIFINAME"
 char pass[] = "pnpnpnpn"; // WiFi PASSWORD "e.g. 12345678"
 
 float get_temperature = 0.0f;
@@ -19,63 +20,9 @@ float get_co2 = 0.0f;
 int get_tempLimit = -1;
 boolean tempState = false;
 
+SoftwareSerial MEGA2560_Serial(D2, D3); // (RX, TX)
+
 float extractValue(String data, String startDelimiter, String endDelimiter);
-void sendToBlynk();
-void resetMCU();
-
-void setup()
-{
-  Serial.begin(9600);  // Initialize Serial Monitor for debugging
-  // Serial1.begin(9600); // Initialize Serial to receive data from ATmega2560
-  Serial.swap();
-
-  WiFi.begin(ssid, pass);
-  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.println("Connecting to WiFi...");
-    delay(1000);
-  }
-  Serial.println("Connected to WiFi!");
-
-  Serial.println("ESP8266 is ready to receive data from ATmega2560.");
-}
-
-void loop()
-{
-  Blynk.run();
-  if (!Serial.available())
-  {
-    String receivedData = Serial.readString(); // Read the incoming string
-    // String receivedData = "Temperature: 23.00 °C, Humidity: 40.00 %, CO2: 59.73 %"; // Read the incoming string
-
-    // Print the received data
-    Serial.print("Received data: ");
-    Serial.println(receivedData);
-
-    // Now parse the received string to extract temperature, humidity, and CO2 values
-
-    // Example: "Temperature: 25.0 °C, Humidity: 60.0 %, CO2: 450 PPM"
-
-    // Extract temperature
-    get_temperature = extractValue(receivedData, "Temperature: ", " °C");
-    // Extract humidity
-    get_humidity = extractValue(receivedData, "Humidity: ", " %");
-    // Extract CO2 concentration
-    get_co2 = extractValue(receivedData, "CO2: ", " %");
-
-    // Print the parsed values
-    Serial.print("Parsed Temperature: ");
-    Serial.println(get_temperature); // Temperature as float
-    Serial.print("Parsed Humidity: ");
-    Serial.println(get_humidity); // Humidity as float
-    Serial.print("Parsed CO2: ");
-    Serial.println(get_co2); // CO2 concentration as int
-
-    sendToBlynk();
-    delay(500);
-  }
-}
 
 BLYNK_WRITE(InternalPinDBG)
 {
@@ -114,6 +61,7 @@ void sendToBlynk()
     // if (get_temperature >= 100) get_temperature = 0;
     // if (get_humidity >= 70) get_humidity = 0;
     // if (get_co2 >= 70) get_co2 = 0;
+    Serial.println(get_temperature + get_humidity + get_co2);
 
     Blynk.virtualWrite(V0, get_temperature);
     Blynk.virtualWrite(V1, get_humidity);
@@ -148,5 +96,66 @@ void resetMCU()
 #endif
   for (;;)
   {
+  }
+}
+
+void getParsedData()
+{
+  String receivedData = MEGA2560_Serial.readString(); // Read the incoming string
+  // String receivedData = "Temperature: 23.00 °C, Humidity: 40.00 %, CO2: 59.73 %"; // Read the incoming string
+
+  // Print the received data
+  Serial.print("Received data: ");
+  Serial.println(receivedData);
+
+  // Now parse the received string to extract temperature, humidity, and CO2 values
+
+  // Example: "Temperature: 25.0 °C, Humidity: 60.0 %, CO2: 450 PPM"
+
+  // Extract temperature
+  get_temperature = extractValue(receivedData, "Temperature: ", " °C");
+  // Extract humidity
+  get_humidity = extractValue(receivedData, "Humidity: ", " %");
+  // Extract CO2 concentration
+  get_co2 = extractValue(receivedData, "CO2: ", " %");
+
+  // Print the parsed values
+  Serial.print("Parsed Temperature: ");
+  Serial.println(get_temperature); // Temperature as float
+  Serial.print("Parsed Humidity: ");
+  Serial.println(get_humidity); // Humidity as float
+  Serial.print("Parsed CO2: ");
+  Serial.println(get_co2); // CO2 concentration as int
+}
+
+void setup()
+{
+  Serial.begin(9600); // Initialize Serial Monitor for debugging
+
+  // Start MEGA2560_Serial communication with the ATmega2560
+  MEGA2560_Serial.begin(9600);
+
+  WiFi.begin(ssid, pass);
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("Connecting to WiFi...");
+    delay(1000);
+  }
+  Serial.println("Connected to WiFi!");
+
+  Serial.println("ESP8266 is ready to receive data from ATmega2560.");
+}
+
+void loop()
+{
+  Blynk.run();
+  if (MEGA2560_Serial.available())
+  {
+    getParsedData();
+
+    sendToBlynk();
+
+    delay(15000);
   }
 }
