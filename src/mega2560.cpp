@@ -83,8 +83,7 @@ void loop() {
       digitalWrite(RELAY_PIN, LOW);
       pump_status = false;
     }
-  } else {
-    Serial.println("Failed to read from DHT sensor!");
+  } else {    Serial.println("Failed to read from DHT sensor!");
   }
 
   // Send data to ESP8266

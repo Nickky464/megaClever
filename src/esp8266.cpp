@@ -25,7 +25,7 @@ int get_tempLimit = -1;
 boolean tempState = false;
 
 // Pin definitions
-const int RELAY_PIN = D2;
+const int RELAY_PIN = D1;
 
 // SoftwareSerial for MEGA2560 communication
 SoftwareSerial MEGA2560_Serial(D2, D3); // (RX, TX)
@@ -83,6 +83,7 @@ void loop()
     getParsedData();
     sendToBlynk();
     checkTimeForRollMotor();
+
     delay(15000);
   }
 }
@@ -177,7 +178,7 @@ void handleRoot()
   html += "<h1>Sensor Data</h1>";
   html += "<p>Temperature: " + String(get_temperature) + " &deg;C</p>";
   html += "<p>Humidity: " + String(get_humidity) + " %</p>";
-  html += "<p>CO2: " + String(get_co2) + " PPM</p>";
+  html += "<p>CO2: " + String(get_co2) + " %</p>";
   html += "</body></html>";
   server.send(200, "text/html", html);
 }
@@ -194,7 +195,9 @@ void checkTimeForRollMotor()
   int currentHour = timeClient.getHours();
   int currentMinute = timeClient.getMinutes();
 
-  if ((currentHour >= 6 && currentHour <= 8) && (currentHour != 8 || currentMinute == 0))
+  Serial.println(currentHour + currentMinute);
+
+  if ((currentHour >= 16 && currentMinute == 28))
   {
     digitalWrite(RELAY_PIN, HIGH);
     Serial.println("Relay ON: 6:00 - 8:00 UTC+7");
@@ -204,4 +207,15 @@ void checkTimeForRollMotor()
     digitalWrite(RELAY_PIN, LOW);
     Serial.println("Relay OFF");
   }
+
+  // if ((currentHour >= 6 && currentHour <= 8) && (currentHour != 8 || currentMinute == 0))
+  // {
+  //   digitalWrite(RELAY_PIN, HIGH);
+  //   Serial.println("Relay ON: 6:00 - 8:00 UTC+7");
+  // }
+  // else
+  // {
+  //   digitalWrite(RELAY_PIN, LOW);
+  //   Serial.println("Relay OFF");
+  // }
 }
