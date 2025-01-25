@@ -24,6 +24,11 @@ boolean get_pump_status = false;
 int get_tempLimit = -1;
 boolean tempState = false;
 
+// multitask variable
+
+unsigned long currentTime = 0;
+unsigned long LastSendTime = 0;
+
 // Pin definitions
 const int RELAY_PIN = D1;
 
@@ -78,14 +83,18 @@ void loop()
   timeClient.update();
   server.handleClient();
 
-  if (MEGA2560_Serial.available())
-  {
-    getParsedData();
-    sendToBlynk();
-    checkTimeForRollMotor();
+  currentTime = millis();
 
-    delay(15000);
+  if (currentTime - LastSendTime >= 15000)
+  {
+    if (MEGA2560_Serial.available())
+    {
+      getParsedData();
+      sendToBlynk();
+    }
   }
+
+  checkTimeForRollMotor();
 }
 
 // Blynk write handler
@@ -197,7 +206,7 @@ void checkTimeForRollMotor()
 
   Serial.println(currentHour + currentMinute);
 
-  if ((currentHour >= 16 && currentMinute == 28))
+  if (((currentHour >= 6 && currentHour <= 8) && (currentHour != 8 || currentMinute == 0)) || ((currentHour >= 18 && currentHour <= 20) && (currentHour != 20 || currentMinute == 0)))
   {
     digitalWrite(RELAY_PIN, HIGH);
     Serial.println("Relay ON: 6:00 - 8:00 UTC+7");
@@ -207,15 +216,4 @@ void checkTimeForRollMotor()
     digitalWrite(RELAY_PIN, LOW);
     Serial.println("Relay OFF");
   }
-
-  // if ((currentHour >= 6 && currentHour <= 8) && (currentHour != 8 || currentMinute == 0))
-  // {
-  //   digitalWrite(RELAY_PIN, HIGH);
-  //   Serial.println("Relay ON: 6:00 - 8:00 UTC+7");
-  // }
-  // else
-  // {
-  //   digitalWrite(RELAY_PIN, LOW);
-  //   Serial.println("Relay OFF");
-  // }
 }
