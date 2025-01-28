@@ -94,7 +94,7 @@ void loop()
     }
   }
 
-  checkTimeForRollMotor();
+  // checkTimeForRollMotor();
 }
 
 // Blynk write handler
@@ -199,21 +199,21 @@ void handleNotFound()
 }
 
 // Check time and control relay
-void checkTimeForRollMotor()
-{
-  int currentHour = timeClient.getHours();
-  int currentMinute = timeClient.getMinutes();
+// void checkTimeForRollMotor()
+// {
+//   int currentHour = timeClient.getHours();
+//   int currentMinute = timeClient.getMinutes();
 
-  Serial.println(currentHour + currentMinute);
+//   Serial.println(currentHour + currentMinute);
 
-  if (((currentHour >= 6 && currentHour <= 8) && (currentHour != 8 || currentMinute == 0)) || ((currentHour >= 18 && currentHour <= 20) && (currentHour != 20 || currentMinute == 0)))
-  {
-    digitalWrite(RELAY_PIN, HIGH);
-    Serial.println("Relay ON: 6:00 - 8:00 UTC+7");
-  }
-  else
-  {
-    digitalWrite(RELAY_PIN, LOW);
-    Serial.println("Relay OFF");
-  }
-}
+//   if (((currentHour >= 6 && currentHour <= 8) && (currentHour != 8 || currentMinute == 0)) || ((currentHour >= 18 && currentHour <= 20) && (currentHour != 20 || currentMinute == 0)))
+//   {
+//     digitalWrite(RELAY_PIN, HIGH);
+//     Serial.println("Relay ON: 6:00 - 8:00 UTC+7");
+//   }
+//   else
+//   {
+//     digitalWrite(RELAY_PIN, LOW);
+//     Serial.println("Relay OFF");
+//   }
+// }
