@@ -84,12 +84,11 @@ void loop()
   server.handleClient();
 
   currentTime = millis();
-
-  if (currentTime - LastSendTime >= 15000)
+  if (MEGA2560_Serial.available())
   {
-    if (MEGA2560_Serial.available())
+    getParsedData();
+    if (currentTime - LastSendTime >= 15000)
     {
-      getParsedData();
       sendToBlynk();
     }
   }

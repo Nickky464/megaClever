@@ -61,11 +61,25 @@ void loop()
   currentTime = millis();
 
   // multitask programing
+  SensorRead();
+  if (humidity <= 50)
+  {
+    digitalWrite(RELAY_PIN, HIGH);
+    pump_status = true; // Set pump status
+    pumpLastTurnOnTime = currentTime;
+    Serial.println("Pump turned ON due to low humidity.");
+  }
+  else if (pump_status && (currentTime - pumpLastTurnOnTime >= 60000) || pump_status && humidity == 60) // 60000ms = 1min.
+  {
+    digitalWrite(RELAY_PIN, LOW);
+    pump_status = false; // Set pump status
+    Serial.println("Pump turned OFF after 1-minute delay.");
+  }
+
   if (currentTime - LastReadAndSend >= 15000)
   {
     LastReadAndSend = currentTime;
     // Read sensor
-    SensorRead();
     // Send data to ESP8266
     sendToESP8266(temp_c, humidity, CO2Percentage, pump_status);
   }
@@ -74,7 +88,7 @@ void loop()
 void SensorRead()
 {
   float co2value = MGReadCO2(MG_PIN, slope, offset);
-  float CO2Percentage = (co2value / 10000) * 100;
+  CO2Percentage = (co2value / 10000) * 100;
 
   // Read DHT sensor
   temp_c = dht.readTemperature();
@@ -92,21 +106,9 @@ void SensorRead()
     Serial.print(" °C >> Humidity: ");
     Serial.print(humidity);
     Serial.println(" %");
+    Serial.print(CO2Percentage);
 
     // Control relay based on humidity
-    if (humidity <= 70)
-    {
-      digitalWrite(RELAY_PIN, HIGH);
-      pump_status = true; // Set pump status
-      pumpLastTurnOnTime = currentTime;
-      Serial.println("Pump turned ON due to low humidity.");
-    }
-    else if (pump_status && (currentTime - pumpLastTurnOnTime >= 60000)) // 60000ms = 1min.
-    {
-      digitalWrite(RELAY_PIN, LOW);
-      pump_status = false; // Set pump status
-      Serial.println("Pump turned OFF after 1-minute delay.");
-    }
   }
   else
   {
