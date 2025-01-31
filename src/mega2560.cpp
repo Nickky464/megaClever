@@ -69,14 +69,14 @@ void loop()
     pumpLastTurnOnTime = currentTime;
     Serial.println("Pump turned ON due to low humidity.");
   }
-  else if (pump_status && (currentTime - pumpLastTurnOnTime >= 60000) || pump_status && humidity == 60) // 60000ms = 1min.
+  else if ((pump_status && (currentTime - pumpLastTurnOnTime >= 60000)) || (pump_status && humidity == 60)) // 60000ms = 1min.
   {
     digitalWrite(RELAY_PIN, LOW);
     pump_status = false; // Set pump status
     Serial.println("Pump turned OFF after 1-minute delay.");
   }
 
-  if (currentTime - LastReadAndSend >= 15000)
+  if (currentTime - LastReadAndSend >= 2000)
   {
     LastReadAndSend = currentTime;
     // Read sensor
@@ -87,7 +87,7 @@ void loop()
 
 void SensorRead()
 {
-  float co2value = MGReadCO2(MG_PIN, slope, offset);
+  co2value = MGReadCO2(MG_PIN, slope, offset);
   CO2Percentage = (co2value / 10000) * 100;
 
   // Read DHT sensor
@@ -106,7 +106,6 @@ void SensorRead()
     Serial.print(" °C >> Humidity: ");
     Serial.print(humidity);
     Serial.println(" %");
-    Serial.print(CO2Percentage);
 
     // Control relay based on humidity
   }

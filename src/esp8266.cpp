@@ -89,6 +89,7 @@ void loop()
     getParsedData();
     if (currentTime - LastSendTime >= 15000)
     {
+      LastSendTime = currentTime;
       sendToBlynk();
     }
   }
@@ -117,23 +118,18 @@ float extractValue(String data, String startDelimiter, String endDelimiter)
 // Send data to Blynk
 void sendToBlynk()
 {
-  static unsigned long lastSendTime = 0;
-  if (millis() - lastSendTime >= 1000)
-  {
-    lastSendTime = millis();
-    Blynk.virtualWrite(V0, get_temperature);
-    Blynk.virtualWrite(V1, get_humidity);
-    Blynk.virtualWrite(V2, get_co2);
+  Blynk.virtualWrite(V0, get_temperature);
+  Blynk.virtualWrite(V1, get_humidity);
+  Blynk.virtualWrite(V2, get_co2);
 
-    if (get_tempLimit != -1 && get_temperature > get_tempLimit && !tempState)
-    {
-      Serial.println("Over Temperature Alert!");
-      tempState = true;
-    }
-    else
-    {
-      tempState = false;
-    }
+  if (get_tempLimit != -1 && get_temperature > get_tempLimit && !tempState)
+  {
+    Serial.println("Over Temperature Alert!");
+    tempState = true;
+  }
+  else
+  {
+    tempState = false;
   }
 }
 
