@@ -2,19 +2,21 @@
 #include <DHT.h>
 #include <SoftwareSerial.h>
 
-// Pin Definitions
-#define MG_PIN A3   // Analog pin for CO2 sensor
-#define BOOL_PIN 2  // Pin for additional sensor (unused here)
-#define RELAY_PIN 4 // Relay control pin
-#define DHT_PIN 2   // DHT sensor pin
+// Co2 Sensor
+#define MG_PIN A3 // Analog pin for CO2 sensor
 
-// Constants
 #define DC_GAIN 8.5              // Amplifier gain
 #define READ_SAMPLE_INTERVAL 50  // Sampling interval in ms
 #define READ_SAMPLE_TIMES 5      // Number of samples to average
 #define ZERO_POINT_VOLTAGE 0.220 // Voltage at 400 PPM CO2
 #define REACTION_VOLTAGE 0.020   // Voltage drop at 1000 PPM CO2
-#define DHT_TYPE DHT11           // DHT sensor type
+
+// DHT Sensor
+#define DHT_PIN 2      // DHT sensor pin
+#define DHT_TYPE DHT11 // DHT sensor type
+
+// Relay pins
+#define RELAY_PIN 4 // Relay control pin
 
 // CO2 Calibration
 float CO2Curve[3] = {2.602, ZERO_POINT_VOLTAGE, REACTION_VOLTAGE / (2.602 - 3)};
@@ -24,7 +26,7 @@ float offset = 0.0;
 // Variables
 float temp_c = 0.0;          // Temperature in Celsius
 float humidity = 0.0;        // Humidity percentage
-boolean pump_status = false; // Pump status
+bool pump_status = false; // Pump status
 float CO2Percentage = 0.0;
 float co2value = 0.0;
 
@@ -32,15 +34,17 @@ unsigned long pumpLastTurnOnTime = 0;
 unsigned long currentTime = 0;
 unsigned long LastReadAndSend = 0;
 
-// Objects
+// Sensor setup
 DHT dht(DHT_PIN, DHT_TYPE);          // Initialize DHT sensor
+
+// Serial comunication
 SoftwareSerial ESP8266_Serial(6, 7); // ESP8266 communication (RX, TX)
 
 // Function Prototypes
 float MGReadCO2(int MG_PIN, float slope, float offset);
 int MGGetCO2Percentage(float volts, float *pcurve);
 
-void sendToESP8266(float temp_c, float humidity, int CO2Percentage, boolean pump_status);
+void sendToESP8266(float temp_c, float humidity, int CO2Percentage, bool pump_status);
 void SensorRead();
 
 // Setup function
@@ -111,13 +115,10 @@ void SensorRead()
   }
   else
   {
-    // temp_c = 9999; // For debug to fixing sensor have a problem.
-    // humidity = 9999; // For debug to fixing sensor have a problem.
     Serial.println("Failed to read from DHT sensor!");
   }
 }
 
-// Function Definitions
 float MGReadCO2(int MG_PIN, float slope, float offset)
 {
   int sensorValue = analogRead(MG_PIN);

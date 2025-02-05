@@ -20,9 +20,9 @@ char pass[] = "pnpnpnpn";
 float get_temperature = 0.0f;
 float get_humidity = 0.0f;
 float get_co2 = 0.0f;
-boolean get_pump_status = false;
+bool get_pump_status = false;
 int get_tempLimit = -1;
-boolean tempState = false;
+bool tempState = false;
 
 // multitask variable
 
